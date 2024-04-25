@@ -1,1 +1,7 @@
 datasets
+opencv
+numpy
+matplotlib
+scikit-image
+ipykernel
+pandas
