@@ -2,6 +2,7 @@ from datasets import load_dataset, load_from_disk
 from PIL import Image
 import pandas as pd
 import numpy as np
+import cv2
 # used when testing most above not needed rn!
 
 # loading the dataset
@@ -27,8 +28,15 @@ saved_dataset = load_from_disk("plastic_in_river_dataset")
 # converts PIL image to numpy array
 pil_image = saved_dataset['test'][0]['image']
 
+I = np.asarray(pil_image) # need to do this for every image
+
+# kevin will soon manipulate data
+
 # Display the image aggregate data from this each pil image
-pil_image.show()
+#pil_image.show()
+
+cv2.imshow('name', I)
+cv2.waitKey(5000)
 
 '''
 dataset = pd.read_csv(
