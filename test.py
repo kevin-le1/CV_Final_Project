@@ -6,6 +6,7 @@ import numpy as np
 
 # loading the dataset
 dataset = load_dataset("kili-technology/plastic_in_river")
+# dataset.save_to_disk("plastic_in_river_dataset") # TO SAVE DATA
 
 # printing the lists of the datasets (3 maps)
 print(list(dataset.keys()))
