@@ -6,7 +6,7 @@ import cv2
 # used when testing most above not needed rn!
 
 # loading the dataset
-dataset = load_dataset("kili-technology/plastic_in_river")
+dataset = load_dataset("kili-technology/plastic_in_river") # use this
 # dataset.save_to_disk("plastic_in_river_dataset") # TO SAVE DATA
 
 # printing the lists of the datasets (3 maps)
@@ -23,34 +23,30 @@ print(dataset['train'][0]['image'])
 # we will manipulate this load from disk dataset when we want to ! we have to parse thru it to relabel issue later ! think
 # abt it later!
 
-saved_dataset = load_from_disk("plastic_in_river_dataset")
+# saved_dataset = load_from_disk("plastic_in_river_dataset") # dont need this lied!
 
 # converts PIL image to numpy array
-pil_image = saved_dataset['test'][0]['image']
+# pil_image = saved_dataset['test'][0]['image']
 
-I = np.asarray(pil_image) # need to do this for every image
+# I = np.asarray(pil_image) # need to do this for every image test
 
 # kevin will soon manipulate data
 
-# Display the image aggregate data from this each pil image
+# display the image data from each pil image
 #pil_image.show()
 
-cv2.imshow('name', I)
-cv2.waitKey(5000)
 
-'''
-dataset = pd.read_csv(
-    hf_hub_download(repo_id=REPO_ID, filename=FILENAME, repo_type="dataset")
-)
+# iterate through the dataset, convert PIL images to NumPy arrays, and replace the image data
+for split_name in dataset.keys(): # pass in dataset
+    for i, example in enumerate(dataset[split_name]):
+        # Convert PIL image to NumPy array
+        pil_image = example['image']
+        np_image = np.asarray(pil_image)
 
-# load the image using PIL
-pil_image = Image.open(dataset['train'][0]['image'], mode = 'r')
+        # Replace PIL image with NumPy array
+        print(np_image)
+        dataset[split_name][i]['image'] = np_image
 
-# converts PIL image to numpy array
-open_cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-
-# display the image using OpenCV
-cv2.imshow("Image", open_cv_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-'''
+dataset.set_format("numpy")
+# Save the modified dataset
+dataset.save_to_disk("saved_dataset")
