@@ -5,3 +5,4 @@ obj_detection/datasets
 obj_detection/yolov8m.pt
 __pycache__/
 obj_detection/YOLOv8/
+ob_det2/yolov8m.pt
