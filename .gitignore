@@ -1,3 +1,7 @@
 plastic_in_river_dataset
 saved_dataset
 models
+obj_detection/datasets
+obj_detection/yolov8m.pt
+__pycache__/
+obj_detection/YOLOv8/

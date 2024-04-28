@@ -35,7 +35,11 @@ print(dataset['train'][0]['image'])
 # display the image data from each pil image
 #pil_image.show()
 
+data = load_from_disk("saved_dataset")
+print(data.shape)
 
+
+'''
 # iterate through the dataset, convert PIL images to NumPy arrays, and replace the image data
 for split_name in dataset.keys(): # pass in dataset
     for i, example in enumerate(dataset[split_name]):
@@ -50,3 +54,4 @@ for split_name in dataset.keys(): # pass in dataset
 dataset.set_format("numpy")
 # Save the modified dataset
 dataset.save_to_disk("saved_dataset")
+'''

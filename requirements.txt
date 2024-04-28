@@ -1,5 +1,5 @@
 datasets
-opencv
+opencv-python==4.8.0.74
 numpy
 matplotlib
 scikit-image
@@ -8,3 +8,5 @@ pandas
 imageai
 torchvision
 tensorflow
+ultralytics
+modal
