@@ -10,3 +10,6 @@ torchvision
 tensorflow
 ultralytics
 modal
+requests
+imutils
+google_images_download

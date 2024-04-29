@@ -1,6 +1,7 @@
 import modal
 import os
-from datasets import load_dataset
+from modal._utils.grpc_utils import retry_transient_errors
+import yaml
 
 # kevin will test this to optimize object detection training to potentially get better results in the future
 
@@ -11,8 +12,6 @@ app = modal.App()
 image = modal.Image.debian_slim().apt_install("libgl1-mesa-glx", "libglib2.0-0").pip_install("ultralytics", "pyyaml", "datasets", "torchvision", "imageai", "numpy", "matplotlib", "pandas", "scikit-image", "ipykernel", "tensorflow", "opencv-python==4.8.0.74")
 
 
-import os
-import modal
 import pathlib
 
 app = modal.App()  # Note: prior to April 2024, "app" was called "stub"
@@ -21,7 +20,11 @@ volume = modal.Volume
 
 p = pathlib.Path("/root/datasets")
 
-@app.function(volumes={"/root/datasets": volume})
+from datasets import load_dataset
+
+dataset = load_dataset('Kili/plastic_in_river', num_proc=6)
+
+@app.function(volumes={"/root/datasets": volume}, image = image, timeout=86400)
 def create_dataset(data, split):
     
     os.makedirs('root/datasets/images/train', exist_ok=True)
@@ -70,7 +73,16 @@ def test(yaml_data):
 
 @app.local_entrypoint()
 def main():
-    test.remote('plastic.yaml')
+    create_dataset.remote(dataset, 'train')
+    create_dataset.remote(dataset, 'test')
+    
+    with open("data.yaml", 'r') as stream:
+        try:
+            data = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+    
+    test.remote(data)
 
 if __name__ == "__main__":
     main()
