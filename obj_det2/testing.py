@@ -1,6 +1,6 @@
 import modal
-import yaml
 import os
+from datasets import load_dataset
 
 # kevin will test this to optimize object detection training to potentially get better results in the future
 
@@ -11,56 +11,53 @@ app = modal.App()
 image = modal.Image.debian_slim().apt_install("libgl1-mesa-glx", "libglib2.0-0").pip_install("ultralytics", "pyyaml", "datasets", "torchvision", "imageai", "numpy", "matplotlib", "pandas", "scikit-image", "ipykernel", "tensorflow", "opencv-python==4.8.0.74")
 
 
-'''
-from datasets import load_dataset
-
-dataset = load_dataset('Kili/plastic_in_river', num_proc=6)
-
-print(dataset)
-
 import os
+import modal
+import pathlib
 
-# only creating datasets for train and validation not test
-os.makedirs('datasets/images/train', exist_ok=True)
-os.makedirs('datasets/images/validation', exist_ok=True)
+app = modal.App()  # Note: prior to April 2024, "app" was called "stub"
 
-os.makedirs('datasets/labels/train', exist_ok=True)
-os.makedirs('datasets/labels/validation', exist_ok=True)
+volume = modal.Volume
 
+p = pathlib.Path("/root/datasets")
 
+@app.function(volumes={"/root/datasets": volume})
 def create_dataset(data, split):
-  data = data[split]
-
-  print(f'Running for {split} split...')
-
-  for idx, sample in enumerate(data):
-    image = sample['image']
-    labels = sample['litter']['label']
-    bboxes = sample['litter']['bbox']
-    targets = []
     
-    # creating the label txt files
-    for label, bbox in zip(labels, bboxes):
-      targets.append(f'{label} {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}')
-      
-    with open(f'datasets/labels/{split}/{idx}.txt', 'w') as f:
-      for target in targets:
-        f.write(target + '\n')
-        
-    # saving image to png
-    image.save(f'datasets/images/{split}/{idx}.png')
+    os.makedirs('root/datasets/images/train', exist_ok=True)
+    os.makedirs('root/datasets/images/validation', exist_ok=True)
 
-# create_dataset(dataset, 'train')
-# create_dataset(dataset, 'validation')
-'''
+    os.makedirs('root/datasets/labels/train', exist_ok=True)
+    os.makedirs('root/datasets/labels/validation', exist_ok=True)
+    data = data[split]
 
-@app.function(gpu="A100-40GB",  image=image)
+    print(f'Running for {split} split...')
+
+    for idx, sample in enumerate(data):
+        image = sample['image']
+        labels = sample['litter']['label']
+        bboxes = sample['litter']['bbox']
+        targets = []
+
+        # creating the label txt files
+        for label, bbox in zip(labels, bboxes):
+            targets.append(f'{label} {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}')
+
+        with open(f'/root/datasets/labels/{split}/{idx}.txt', 'w') as f:
+            for target in targets:
+                f.write(target + '\n')
+
+        # saving image to png
+        image.save(f'/root/datasets/images/{split}/{idx}.png')
+
+
+
+@app.function(gpu="A100-40GB",  image=image, timeout=86400)
 def test(yaml_data):
     from ultralytics import YOLO
     
     model = YOLO('yolov8m.pt')  # yolov8 architecture
 
-    
     model.train(
         data=yaml_data,  # this plastic.yaml is the config file for object detection
         epochs=20,  # relatively low for now just for testing
@@ -69,19 +66,11 @@ def test(yaml_data):
         optimizer='Adam',
         lr0=1e-3,
         resume = True,
-        device = '0'
     )
 
 @app.local_entrypoint()
 def main():
-    # Load the YAML data from the file
-    with open('plastic.yaml', 'r') as file:
-        yaml_data = yaml.load(file, Loader=yaml.FullLoader)
-
-    # Convert yaml_data to a string
-    yaml_str = yaml.dump(yaml_data)
-
-    test.remote(yaml_str)
+    test.remote('plastic.yaml')
 
 if __name__ == "__main__":
     main()
