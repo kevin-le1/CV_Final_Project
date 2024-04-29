@@ -23,3 +23,10 @@ The project explores strategies to handle challenges such as varying lighting co
 - `results/`: Directory for storing evaluation results, visualizations, and performance metrics.
 - `requirements.txt`: Python package dependencies.
 - `README.md`: This file.
+  This project consists of object detection and class identification of waste in rivers.
+
+Object detection uses yolov8 architecture!
+
+CNN uses \_\_\_ architecture!
+
+More details in respective directory!
