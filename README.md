@@ -6,27 +6,22 @@ This repository contains the code and resources for the research project "Machin
 
 The system employs a two-stage approach:
 
-1. **Object Detection**: Localize pollutants within images or video frames using state-of-the-art object detection models like Faster R-CNN and YOLO.
-2. **Multi-class Classification**: Categorize the detected objects into predefined classes (e.g., plastic, aluminum, oil, sewage) using deep neural network architectures like ResNet and EfficientNet.
+1. **Object Detection**: Localize pollutants within images or video frames using state-of-the-art object detection models such as YOLOv8 architecture and adam for momentum.
+2. **Multi-class Classification**: Categorize the images into predefined classes (e.g., clean water, spils (oil), unclean water) using deep neural network architectures like ResNet and EfficientNet.
 
 The project explores strategies to handle challenges such as varying lighting conditions, water turbidity, occlusions, and class imbalances, employing techniques like data augmentation, transfer learning, ensemble methods, and attention mechanisms.
 
 ## Repository Structure
 
-- `data/`: Directory for storing datasets (e.g., Hugging Face dataset, manually annotated data).
-- `models/`: Trained model weights and configurations.
-- `src/`: Source code for the project.
-  - `src/detection/`: Object detection module.
-  - `src/classification/`: Multi-class classification module.
-  - `src/utils/`: Utility functions and helpers.
-- `notebooks/`: Jupyter Notebooks for experimentation and analysis.
-- `results/`: Directory for storing evaluation results, visualizations, and performance metrics.
+- `cnn/`: Directory for our CNN model and results
+
+- `evaluations/`: Quantitative and qualititative notebooks (includes images and writeups)
+
+- `obj_detection/`: Directory for our object detection model and results
+  - `obj_detection/datasets/`: Cleaned / Modified datasets for our training (e.g., Hugging Face dataset, manually annotated data).
+  - `obj_detection/training_results/`: The best.pt, last.pt of the training results and additional quantitative results.
+
 - `requirements.txt`: Python package dependencies.
 - `README.md`: This file.
+
   This project consists of object detection and class identification of waste in rivers.
-
-Object detection uses yolov8 architecture!
-
-CNN uses \_\_\_ architecture!
-
-More details in respective directory!
