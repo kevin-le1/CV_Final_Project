@@ -4,10 +4,10 @@ import os
 import urllib.request
 
 # Set the search query
-query = "oil_spills_in_water"
+query = "oil_spill_bird_eye_view"
 
 # Set the number of images to download
-num_images = 100
+num_images = 20
 
 # Set the directory to save the images
 save_dir = query
