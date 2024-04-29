@@ -4,8 +4,7 @@ import modal
 app = modal.App()
 
 # Create the image
-image = modal.Image.debian_slim().pip_install("ultralytics", "datasets", "torchvision", "imageai", "numpy", "matplotlib", "pandas", "scikit-image", "ipykernel", "tensorflow", "opencv-python==4.8.0.74")
-
+image = modal.Image.debian_slim().apt_install("libgl1-mesa-glx", "libglib2.0-0").pip_install("ultralytics", "datasets", "torchvision", "imageai", "numpy", "matplotlib", "pandas", "scikit-image", "ipykernel", "tensorflow", "opencv-python==4.8.0.74")
 
 @app.function(gpu="A100-40GB",  image=image)
 def test():
