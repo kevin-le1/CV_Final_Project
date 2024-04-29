@@ -1,4 +1,4 @@
-path: /Users/kevin/Desktop/cv/final_project/obj_detection/datasets # put your own path
+path: /Users/kevin/Desktop/cv/final_project/obj_detection/datasets/ # put your own path
 train: images/train
 val: images/validation
 
