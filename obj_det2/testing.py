@@ -1,88 +1,169 @@
-import modal
 import os
-from modal._utils.grpc_utils import retry_transient_errors
-import yaml
-
-# kevin will test this to optimize object detection training to potentially get better results in the future
-
-# Initialize the Modal app instance
-app = modal.App()
-
-# Create the image
-image = modal.Image.debian_slim().apt_install("libgl1-mesa-glx", "libglib2.0-0").pip_install("ultralytics", "pyyaml", "datasets", "torchvision", "imageai", "numpy", "matplotlib", "pandas", "scikit-image", "ipykernel", "tensorflow", "opencv-python==4.8.0.74")
-
-
 import pathlib
-
-app = modal.App()  # Note: prior to April 2024, "app" was called "stub"
-
-volume = modal.Volume
-
-p = pathlib.Path("/root/datasets")
-
+import yaml
 from datasets import load_dataset
+from modal import App, Image, Volume
+import torch
+from hub_sdk import HUBClient
+import matplotlib.pyplot as plt
 
-dataset = load_dataset('Kili/plastic_in_river', num_proc=6)
 
-@app.function(volumes={"/root/datasets": volume}, image = image, timeout=86400)
-def create_dataset(data, split):
-    
-    os.makedirs('root/datasets/images/train', exist_ok=True)
-    os.makedirs('root/datasets/images/validation', exist_ok=True)
+app = App()
 
-    os.makedirs('root/datasets/labels/train', exist_ok=True)
-    os.makedirs('root/datasets/labels/validation', exist_ok=True)
-    data = data[split]
+# Define the image with required dependencies
+image = (
+    Image.debian_slim()
+    .apt_install("libgl1-mesa-glx", "libglib2.0-0")
+    .pip_install(
+        "ultralytics", "pyyaml", "datasets", "torchvision", "imageai", "numpy",
+        "matplotlib", "pandas", "scikit-image", "ipykernel", "tensorflow",
+        "opencv-python==4.8.0.74", "hub-sdk", "tblib", "dill"
+    )
+)
+
+# Create a volume
+volume = Volume.from_name("my-persisted-volume", create_if_missing=True)
+
+# Load dataset
+#dataset = load_dataset('Kili/plastic_in_river')
+'''
+# Function to create dataset
+@app.function(volumes={"/root/datasets": volume}, image=image, timeout=86400)
+def create_dataset(idx, sample, split):
+    os.makedirs(f'/root/datasets/images/{split}', exist_ok=True)
+    os.makedirs(f'/root/datasets/labels/{split}', exist_ok=True)
 
     print(f'Running for {split} split...')
 
-    for idx, sample in enumerate(data):
-        image = sample['image']
-        labels = sample['litter']['label']
-        bboxes = sample['litter']['bbox']
-        targets = []
+    image = sample['image']
+    labels = sample['litter']['label']
+    bboxes = sample['litter']['bbox']
+    targets = []
 
-        # creating the label txt files
-        for label, bbox in zip(labels, bboxes):
-            targets.append(f'{label} {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}')
+    # Creating the label txt files
+    for label, bbox in zip(labels, bboxes):
+        targets.append(f'{label} {bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}')
 
-        with open(f'/root/datasets/labels/{split}/{idx}.txt', 'w') as f:
-            for target in targets:
-                f.write(target + '\n')
+    with open(f'/root/datasets/labels/{split}/{idx}.txt', 'w') as f:
+        for target in targets:
+            f.write(target + '\n')
 
-        # saving image to png
-        image.save(f'/root/datasets/images/{split}/{idx}.png')
+    # Saving image to png
+    image.save(f'/root/datasets/images/{split}/{idx}.png')
+    volume.commit()
+'''
 
-
-
-@app.function(gpu="A100-40GB",  image=image, timeout=86400)
-def test(yaml_data):
+# Function to test YOLO model
+@app.function(gpu="A100-40GB", image=image, timeout=86400, volumes={"/root/datasets": volume})
+def test():
+    
+    volume.reload()
     from ultralytics import YOLO
+    import matplotlib.pyplot as plt
+    import tblib
+    from PIL import Image
     
     model = YOLO('yolov8m.pt')  # yolov8 architecture
 
+        # Your dataset configuration as a dictionary
+    dataset_config = {
+        'path': '.',
+        'train': 'images/train',
+        'val': 'images/test',
+        'names': {
+            0: 'PLASTIC_BAG',
+            1: 'PLASTIC_BOTTLE',
+            2: 'OTHER_PLASTIC_WASTE',
+            3: 'NOT_PLASTIC_WASTE'
+        }
+    }
+
+    # Convert the dictionary to a YAML string
+    yaml_str = yaml.dump(dataset_config)
+
+    # Save the YAML string to a file
+    with open('plastic.yaml', 'w') as file:
+        file.write(yaml_str)
+        
+        
+        # Making the code device-agnostic
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+    
+    # Transferring the model to a CUDA enabled GPU
+    model = model.to(device)
+    save_dir = f'/root/datasets/results'
+    os.makedirs(save_dir, exist_ok=True)
+    
     model.train(
-        data=yaml_data,  # this plastic.yaml is the config file for object detection
-        epochs=20,  # relatively low for now just for testing
+        data='plastic.yaml',  # this plastic.yaml is the config file for object detection
+        epochs=10,  # relatively low for now just for testing
         imgsz=(1280, 720),  # width, height
         batch=4,
         optimizer='Adam',
-        lr0=1e-3,
-        resume = True,
+        lr0=1e-4,
+        device = 0,
+        project=save_dir
     )
+    volume.commit()
+    
+    torch.save(model.state_dict(), f'/root/datasets/trained10pt2epoch.pt')
+    volume.commit()
+    
+    model.save('yolov810epochtest.pt')
+    
+    volume.commit()
 
+    
+@app.function(image=image, timeout=86400, volumes={"/root/datasets": volume})
+def plot_result_gen():
+    from PIL import Image
+    from matplotlib import pyplot as plt
+    from ultralytics import YOLO
+    
+    # Load the checkpoint file
+    checkpoint = torch.load('/root/datasets/trained10epoch.pt', map_location=torch.device('cpu'))
+    model = YOLO('yolov8m.pt')
+    model.load_state_dict(checkpoint)
+
+    print(model)
+    
+'''
+
+    img = Image.open("/root/datasets/images/test/1.png")
+
+    pred = model.predict(img)[0]
+    print(pred.boxes)
+
+    # plotting the image with bounding boxes
+    pred = pred.plot(line_width=1)
+    
+    # convert from BGR to RGB
+    pred_rgb = pred[..., ::-1]
+    pred_img = Image.fromarray(pred_rgb)
+
+    plt.imshow(pred_img)
+    plt.title(f'Test Image: {1}')
+    plt.xticks([])
+    plt.yticks([])
+    plt.show()
+
+'''
+
+# Main entry point
 @app.local_entrypoint()
 def main():
-    create_dataset.remote(dataset, 'train')
-    create_dataset.remote(dataset, 'test')
-    
-    with open("data.yaml", 'r') as stream:
-        try:
-            data = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
-    
-    test.remote(data)
+    ''' 
+    train_dataset = dataset['train']
+    for idx, sample in enumerate(train_dataset):
+        create_dataset.remote(idx, sample, 'train')
 
+    test_dataset = dataset['test']
+    for idx, sample in enumerate(test_dataset):
+        create_dataset.remote(idx, sample, 'test')
+    '''
+    test.remote()
+    #plot_result_gen.remote()
+    
 if __name__ == "__main__":
     main()

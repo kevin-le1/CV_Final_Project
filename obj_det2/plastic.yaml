@@ -1,7 +1,6 @@
-path: root/datasets/ # put your own path
+path: my-persisted-volume/
 train: images/train
-val: images/validation
-
+test: images/test
 names:
   0: PLASTIC_BAG
   1: PLASTIC_BOTTLE
