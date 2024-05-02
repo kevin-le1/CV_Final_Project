@@ -63,7 +63,7 @@ def test():
     import tblib
     from PIL import Image
     
-    model = YOLO('yolov8m.pt')  # yolov8 architecture
+    model = YOLO('/root/datasets/results/train/weights/best.pt')  # yolov8 architecture
 
         # Your dataset configuration as a dictionary
     dataset_config = {
@@ -92,7 +92,7 @@ def test():
     
     # Transferring the model to a CUDA enabled GPU
     model = model.to(device)
-    save_dir = f'/root/datasets/results'
+    save_dir = f'/root/datasets/results2'
     os.makedirs(save_dir, exist_ok=True)
     
     model.train(
@@ -101,7 +101,7 @@ def test():
         imgsz=(1280, 720),  # width, height
         batch=4,
         optimizer='Adam',
-        lr0=1e-4,
+        lr0=1e-3,
         device = 0,
         project=save_dir
     )
