@@ -25,8 +25,8 @@ image = (
 volume = Volume.from_name("my-persisted-volume", create_if_missing=True)
 
 # Load dataset
-#dataset = load_dataset('Kili/plastic_in_river')
-'''
+dataset = load_dataset('Kili/plastic_in_river')
+
 # Function to create dataset
 @app.function(volumes={"/root/datasets": volume}, image=image, timeout=86400)
 def create_dataset(idx, sample, split):
@@ -51,10 +51,10 @@ def create_dataset(idx, sample, split):
     # Saving image to png
     image.save(f'/root/datasets/images/{split}/{idx}.png')
     volume.commit()
-'''
+
 
 # Function to test YOLO model
-@app.function(gpu="A100-40GB", image=image, timeout=86400, volumes={"/root/datasets": volume})
+@app.function(gpu="H100", image=image, timeout=86400, volumes={"/root/datasets": volume})
 def test():
     
     volume.reload()
@@ -97,8 +97,8 @@ def test():
     
     model.train(
         data='plastic.yaml',  # this plastic.yaml is the config file for object detection
-        epochs=10,  # relatively low for now just for testing
-        imgsz=(1280, 720),  # width, height
+        epochs=40,  # relatively low for now just for testing
+        imgsz=(1920, 1080),  # width, height
         batch=4,
         optimizer='Adam',
         lr0=1e-3,
@@ -115,45 +115,10 @@ def test():
     volume.commit()
 
     
-@app.function(image=image, timeout=86400, volumes={"/root/datasets": volume})
-def plot_result_gen():
-    from PIL import Image
-    from matplotlib import pyplot as plt
-    from ultralytics import YOLO
-    
-    # Load the checkpoint file
-    checkpoint = torch.load('/root/datasets/trained10epoch.pt', map_location=torch.device('cpu'))
-    model = YOLO('yolov8m.pt')
-    model.load_state_dict(checkpoint)
-
-    print(model)
-    
-'''
-
-    img = Image.open("/root/datasets/images/test/1.png")
-
-    pred = model.predict(img)[0]
-    print(pred.boxes)
-
-    # plotting the image with bounding boxes
-    pred = pred.plot(line_width=1)
-    
-    # convert from BGR to RGB
-    pred_rgb = pred[..., ::-1]
-    pred_img = Image.fromarray(pred_rgb)
-
-    plt.imshow(pred_img)
-    plt.title(f'Test Image: {1}')
-    plt.xticks([])
-    plt.yticks([])
-    plt.show()
-
-'''
-
 # Main entry point
 @app.local_entrypoint()
 def main():
-    ''' 
+    
     train_dataset = dataset['train']
     for idx, sample in enumerate(train_dataset):
         create_dataset.remote(idx, sample, 'train')
@@ -161,9 +126,8 @@ def main():
     test_dataset = dataset['test']
     for idx, sample in enumerate(test_dataset):
         create_dataset.remote(idx, sample, 'test')
-    '''
+    
     test.remote()
-    #plot_result_gen.remote()
     
 if __name__ == "__main__":
     main()
