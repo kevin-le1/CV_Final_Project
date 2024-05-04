@@ -63,7 +63,7 @@ def test():
     import tblib
     from PIL import Image
     
-    model = YOLO('/root/datasets/results/train/weights/best.pt')  # yolov8 architecture
+    model = YOLO('yolov8m.pt')  # yolov8 architecture
 
         # Your dataset configuration as a dictionary
     dataset_config = {
@@ -118,7 +118,7 @@ def test():
 # Main entry point
 @app.local_entrypoint()
 def main():
-    '''
+    
     train_dataset = dataset['train']
     for idx, sample in enumerate(train_dataset):
         create_dataset.remote(idx, sample, 'train')
@@ -126,7 +126,7 @@ def main():
     test_dataset = dataset['test']
     for idx, sample in enumerate(test_dataset):
         create_dataset.remote(idx, sample, 'test')
-    '''
+    
     test.remote()
     
 if __name__ == "__main__":
