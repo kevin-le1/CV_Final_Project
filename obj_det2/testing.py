@@ -37,7 +37,7 @@ image = (
 volume = Volume.from_name("my-persisted-volume", create_if_missing=True)
 
 # Load dataset
-# dataset = load_dataset('Kili/plastic_in_river')
+dataset = load_dataset('Kili/plastic_in_river')
 
 # Function to create dataset
 @app.function(volumes={"/root/datasets": volume}, image=image, timeout=86400)
