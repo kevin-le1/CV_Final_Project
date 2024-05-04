@@ -25,7 +25,7 @@ image = (
 volume = Volume.from_name("my-persisted-volume", create_if_missing=True)
 
 # Load dataset
-dataset = load_dataset('Kili/plastic_in_river')
+# dataset = load_dataset('Kili/plastic_in_river')
 
 # Function to create dataset
 @app.function(volumes={"/root/datasets": volume}, image=image, timeout=86400)
@@ -92,33 +92,26 @@ def test():
     
     # Transferring the model to a CUDA enabled GPU
     model = model.to(device)
-    save_dir = f'/root/datasets/results2'
+    save_dir = f'/root/datasets/results4'
     os.makedirs(save_dir, exist_ok=True)
     
     model.train(
         data='plastic.yaml',  # this plastic.yaml is the config file for object detection
-        epochs=40,  # relatively low for now just for testing
+        epochs=200,  # relatively low for now just for testing
         imgsz=(1920, 1080),  # width, height
-        batch=4,
+        batch=2,
         optimizer='Adam',
         lr0=1e-3,
         device = 0,
         project=save_dir
     )
     volume.commit()
-    
-    torch.save(model.state_dict(), f'/root/datasets/trained10pt2epoch.pt')
-    volume.commit()
-    
-    model.save('yolov810epochtest.pt')
-    
-    volume.commit()
 
     
 # Main entry point
 @app.local_entrypoint()
 def main():
-    
+    '''
     train_dataset = dataset['train']
     for idx, sample in enumerate(train_dataset):
         create_dataset.remote(idx, sample, 'train')
@@ -126,7 +119,7 @@ def main():
     test_dataset = dataset['test']
     for idx, sample in enumerate(test_dataset):
         create_dataset.remote(idx, sample, 'test')
-    
+    '''
     test.remote()
     
 if __name__ == "__main__":
