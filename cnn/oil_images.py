@@ -1,3 +1,7 @@
+"""
+Scrape Google images after a query argument to pad our dataset with more training/test/val images
+"""
+
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -10,7 +14,7 @@ query = "oil_spill_bird_eye_view"
 num_images = 20
 
 # Set the directory to save the images
-save_dir = query
+save_dir = f"oil/{query}"
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
