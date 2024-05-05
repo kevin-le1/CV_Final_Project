@@ -1,0 +1,16 @@
+TY  - JOUR
+AU  - Chen, Luya
+AU  - Zhu, Jianping
+PY  - 2024
+DA  - 2024/03/13
+TI  - Water surface garbage detection based on lightweight YOLOv5
+JO  - Scientific Reports
+SP  - 6133
+VL  - 14
+IS  - 1
+AB  - With the development of deep learning technology, researchers are increasingly paying attention to how to efficiently salvage surface garbage. Since the 1980s, the development of plastic products and economic growth has led to the accumulation of a large amount of garbage in rivers. Due to the large amount of garbage and the high risk of surface operations, the efficiency of manual garbage retrieval will be greatly reduced. Among existing methods, using YOLO algorithm to detect target objects is the most popular. Compared to traditional detection algorithms, YOLO algorithm not only has higher accuracy, but also is more lightweight. This article presents a lightweight YOLOv5 water surface garbage detection algorithm suitable for deployment on unmanned ships. This article has been validated on the Orca dataset, experimental results showed that the detection speed of the improved YOLOv5 increased by 4.3%, mAP value reached 84.9%, precision reached 88.7%, the parameter quantity only accounts for 12% of the original data. Compared with the original algorithm, the improved algorithm not only has higher accuracy, but also can be applied to more hardware devices due to its lighter weight.
+SN  - 2045-2322
+UR  - https://doi.org/10.1038/s41598-024-55051-3
+DO  - 10.1038/s41598-024-55051-3
+ID  - Chen2024
+ER  - 

@@ -1,0 +1,18 @@
+TY  - JOUR
+AU  - Hino, M.
+AU  - Benami, E.
+AU  - Brooks, N.
+PY  - 2018
+DA  - 2018/10/01
+TI  - Machine learning for environmental monitoring
+JO  - Nature Sustainability
+SP  - 583
+EP  - 588
+VL  - 1
+IS  - 10
+AB  - Public agencies aiming to enforce environmental regulation have limited resources to achieve their objectives. We demonstrate how machine-learning methods can inform the efficient use of these limited resources while accounting for real-world concerns, such as gaming the system and institutional constraints. Here, we predict the likelihood of a facility failing a water-pollution inspection and propose alternative inspection allocations that would target high-risk facilities. Implementing such a data-driven inspection allocation could detect over seven times the expected number of violations than current practices. When we impose constraints, such as maintaining a minimum probability of inspection for all facilities and accounting for state-level differences in inspection budgets, our reallocation regimes double the number of violations detected through inspections. Leveraging increasing amounts of electronic data can help public agencies to enhance their regulatory effectiveness and remedy environmental harms. Although employing algorithm-based resource allocation rules requires care to avoid manipulation and unintentional error propagation, the principled use of predictive analytics can extend the beneficial reach of limited resources.
+SN  - 2398-9629
+UR  - https://doi.org/10.1038/s41893-018-0142-9
+DO  - 10.1038/s41893-018-0142-9
+ID  - Hino2018
+ER  - 

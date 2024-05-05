@@ -1,0 +1,8 @@
+path: my-persisted-volume/
+train: images/train
+test: images/test
+names:
+  0: PLASTIC_BAG
+  1: PLASTIC_BOTTLE
+  2: OTHER_PLASTIC_WASTE
+  3: NOT_PLASTIC_WASTE
