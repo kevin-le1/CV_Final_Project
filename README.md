@@ -21,8 +21,19 @@ The project explores strategies to handle challenges such as varying lighting co
   - `obj_det_no_gpu/results3/`: Third trained results parameters 1280 720 batches 4 epochs 40 lr 1e-3 (has evaluation / model)
   - `obj_det_no_gpu/results4/`: Third trained results parameters 1920 1080 batches 2 epochs 200 lr 1e-3 (has evaluation / model)
   - `obj_det_no_gpu/train.py/`: Juypter notebook, training object detection for waste with modal lab code implementation
-  - `obj_det_no_gpu/plastic.yaml/`: Yaml file to define paths to validation and training data / classes
 
+<br />
+How to run:
+<br />
+
+After installing all of the dependencies, cd into obj_det_no_gpu/ and run the following command:
+  - modal run train.py
+<br />
+
+To obtain the results, run the following command
+  - modal volume get my-persisted-volume (path) (dest)
+
+<br />
 
 - `obj_det_no_gpu/`: Directory for our object detection model and results (trained w/ gpu, using Modal Labs)
   - `obj_det_no_gpu/datasets/`: Cleaned / Modified datasets for our training (e.g., Hugging Face dataset, manually annotated data).
@@ -30,6 +41,12 @@ The project explores strategies to handle challenges such as varying lighting co
   - `obj_det_no_gpu/obj_detection.ipynb/`: Juypter notebook, training object detection for waste (parameters in notebook)
   - `obj_det_no_gpu/plastic.yaml/`: Yaml file to define paths to validation and training data / classes
 
+<br />
+How to run:
+<br />
+After installing all of the dependencies, run each cell in `obj_det_no_gpu/obj_detection.ipynb/`.
+
+<br />
 
 - `requirements.txt`: Python package dependencies.
 - `README.md`: This file.
