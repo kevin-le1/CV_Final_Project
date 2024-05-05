@@ -15,11 +15,19 @@ The project explores strategies to handle challenges such as varying lighting co
 
 - `cnn/`: Directory for our CNN model and results
 
-- `evaluations/`: Quantitative and qualititative notebooks (includes images and writeups)
+- `obj_det_no_gpu/`: Directory for our object detection model and results (trained w/o gpu data stored in modal labs)
+  - `obj_det_no_gpu/results/`: First trained results parameters 1280 720 batches 4 epochs 10 lr 1e-4 (has evaluation / model)
+  - `obj_det_no_gpu/results2/`: Second trained results parameters 1280 720 batches 4 epochs 20 lr 1e-4 (has evaluation / model)
+  - `obj_det_no_gpu/results3/`: Third trained results parameters 1280 720 batches 4 epochs 40 lr 1e-3 (has evaluation / model)
+  - `obj_det_no_gpu/results4/`: Third trained results parameters 1920 1080 batches 2 epochs 200 lr 1e-3 (has evaluation / model)
+  - `obj_det_no_gpu/train.py/`: Juypter notebook, training object detection for waste with modal lab code implementation
+  - `obj_det_no_gpu/plastic.yaml/`: Yaml file to define paths to validation and training data / classes
 
-- `obj_detection/`: Directory for our object detection model and results
-  - `obj_detection/datasets/`: Cleaned / Modified datasets for our training (e.g., Hugging Face dataset, manually annotated data).
-  - `obj_detection/training_results/`: The best.pt, last.pt of the training results and additional quantitative results.
+- `obj_det_no_gpu/`: Directory for our object detection model and results (trained w/ gpu, using Modal Labs)
+  - `obj_det_no_gpu/datasets/`: Cleaned / Modified datasets for our training (e.g., Hugging Face dataset, manually annotated data).
+  - `obj_det_no_gpu/training_results/`: The best.pt, last.pt of the training results and additional quantitative results.
+  - `obj_det_no_gpu/obj_detection.ipynb/`: Juypter notebook, training object detection for waste (parameters in notebook)
+  - `obj_det_no_gpu/plastic.yaml/`: Yaml file to define paths to validation and training data / classes
 
 - `requirements.txt`: Python package dependencies.
 - `README.md`: This file.
