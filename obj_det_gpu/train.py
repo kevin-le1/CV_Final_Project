@@ -4,7 +4,6 @@ import yaml
 from datasets import load_dataset
 from modal import App, Image, Volume
 import torch
-from hub_sdk import HUBClient
 import matplotlib.pyplot as plt
 
 
@@ -27,9 +26,7 @@ image = (
         "ipykernel",
         "tensorflow",
         "opencv-python==4.8.0.74",
-        "hub-sdk",
         "tblib",
-        "dill",
     )
 )
 
@@ -39,14 +36,14 @@ volume = Volume.from_name("my-persisted-volume", create_if_missing=True)
 # Load dataset
 dataset = load_dataset('Kili/plastic_in_river')
 
-# Function to create dataset
+# Function to create dataset referenced https://github.com/AniLeo-01/Plastic-In-River-Detection
 @app.function(volumes={"/root/datasets": volume}, image=image, timeout=86400)
 def create_dataset(idx, sample, split):
     os.makedirs(f"/root/datasets/images/{split}", exist_ok=True)
     os.makedirs(f"/root/datasets/labels/{split}", exist_ok=True)
-
+    
     print(f"Running for {split} split...")
-
+    
     image = sample["image"]
     labels = sample["litter"]["label"]
     bboxes = sample["litter"]["bbox"]
@@ -79,7 +76,7 @@ def test():
 
     model = YOLO("yolov8m.pt")  # yolov8 architecture
 
-    # Your dataset configuration as a dictionary
+    # Your dataset configuration as a dictionary (config referenced https://github.com/AniLeo-01/Plastic-In-River-Detection)
     dataset_config = {
         "path": ".",
         "train": "images/train",
@@ -118,14 +115,6 @@ def test():
         project=save_dir,
     )
     volume.commit()
-    
-    torch.save(model.state_dict(), f'/root/datasets/trained10pt2epoch.pt')
-    volume.commit()
-    
-    model.save('yolov810epochtest.pt')
-    
-    volume.commit()
-
 
 # Main entry point
 @app.local_entrypoint()
