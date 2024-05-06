@@ -13,14 +13,17 @@ import wandb
 
 from datetime import datetime, timedelta
 
-
 from preprocess import load_data
+
+import torch.multiprocessing
+
+torch.multiprocessing.set_sharing_strategy("file_system")
 
 # ---- hyperparameters and other configs
 NUM_CLASSES = 3  # CLEAN, OIL, TRASH
 NUM_EPOCHS = 200
 BATCH_SIZE = 128  # note that long run used batch size 64
-LEARNING_RATE = 0.0004
+LEARNING_RATE = 0.01
 MAX_LEARNING_RATE = 0.01
 LR_PATIENCE = 2
 LR_FACTOR = 0.5
@@ -66,7 +69,7 @@ def test(
     device: torch.device,
     test_loader: DataLoader,
     criterion: nn.CrossEntropyLoss,
-    show_img: bool = True,
+    show_img: bool = False,
     test: bool = True,
 ):
     """
@@ -96,8 +99,7 @@ def test(
             )
 
     size = len(test_loader.dataset)  # type: ignore
-    # TODO: change to total_mini_batches
-    loss /= size
+    loss /= total_mini_batches
     accuracy = correct / size
 
     eval_type = "Test" if test else "Val"
@@ -186,8 +188,7 @@ def train(
     )
 
     if wandb_enabled:
-        # TODO: multiply accuracy by 100.0 here
-        wandb.log({"Average Train Loss": avg_loss, "Train Accuracy": accuracy})
+        wandb.log({"Average Train Loss": avg_loss, "Train Accuracy": 100.0 * accuracy})
 
 
 def main():
@@ -201,11 +202,11 @@ def main():
             resume=RESUME,
             id=RESUME_ID,
         )
-        wandb.config.update(
-            {"lr": LEARNING_RATE},
-            allow_val_change=True,
-        )
-        # wandb.config.lr = LEARNING_RATE
+        # wandb.config.update(
+        #     {"lr": LEARNING_RATE},
+        #     allow_val_change=True,
+        # )
+        wandb.config.lr = LEARNING_RATE
         wandb.config.lr_patience = LR_PATIENCE
         wandb.config.lr_factor = LR_FACTOR
         wandb.config.wd = WEIGHT_DECAY
@@ -229,7 +230,6 @@ def main():
         weight_decay=WEIGHT_DECAY,
     )
 
-    # TODO: load model file here if provided
     if wandb_enabled and wandb.run.resumed:  # type: ignore
         if LOAD_MODEL_FILE is not None:
             model.load_state_dict(torch.load(LOAD_MODEL_FILE))
@@ -239,15 +239,11 @@ def main():
 
     test_loader = load_data(ROOT_IMG_DIR, BATCH_SIZE, shuffle=False, test=True)
 
-    # sched = torch.optim.lr_scheduler.OneCycleLR(
-    #     optimizer,
-    #     MAX_LEARNING_RATE,
-    #     epochs=NUM_EPOCHS,
-    #     steps_per_epoch=len(train_loader),
-    # )
-    # note switched to ReduceLROnPlateau around step 1600 on wandb
-    sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, "max", factor=LR_FACTOR, patience=LR_PATIENCE
+    sched = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer,
+        MAX_LEARNING_RATE,
+        epochs=NUM_EPOCHS,
+        steps_per_epoch=len(train_loader),
     )
 
     # automatically track gradients with wandb
@@ -264,7 +260,7 @@ def main():
             best_test_acc = test_res["Test Accuracy"]
             print(f"[ALERT] new highest test accuracy at epoch {epoch}")
         save(model, epoch, test_res["Test Loss"], test_res["Test Accuracy"])
-        sched.step(test_res["Test Accuracy"])
+        sched.step()
         print(
             f"[Epoch {epoch} END]\tlr: {get_lr(optimizer)}\ttest loss: {test_res['Test Loss']}\ttest acc: {test_res['Test Accuracy']}\tval loss: {val_res['Val Loss']}\tval acc: {val_res['Val Accuracy']}"
         )
