@@ -42,6 +42,6 @@ for i, row in loaded_experiment_df.iterrows():
     if len(metrics) != THRESHOLD:
         continue
 
-    run.log(metrics)
+    run.log(metrics)  # type: ignore
     metrics = {}  # reset dict
-run.finish()
+run.finish()  # type: ignore
