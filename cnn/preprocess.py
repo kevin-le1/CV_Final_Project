@@ -9,6 +9,10 @@ from typing import Union
 from PIL import Image
 from tqdm import tqdm
 
+import torch.multiprocessing
+
+torch.multiprocessing.set_sharing_strategy("file_system")
+
 # ---- hyperparameters and other configs
 IMG_HEIGHT = 224
 IMG_WIDTH = 224
@@ -107,4 +111,5 @@ def load_data(
     return (train_loader, val_loader)
 
 
-# print(compute_mean_std(ROOT_IMG_DIR))
+if __name__ == "__main__":
+    print(compute_mean_std(ROOT_IMG_DIR))

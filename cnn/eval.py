@@ -1,10 +1,12 @@
 import torch
-from torch import nn
 from torch.utils.data import DataLoader
-from sklearn.metrics import ConfusionMatrixDisplay
+
+from sklearn.metrics import ConfusionMatrixDisplay, classification_report
+
+from collections import Counter
+import argparse
 
 from model import ResNet
-
 from preprocess import load_data
 
 ##
@@ -15,7 +17,9 @@ DROPOUT_RATE = 0.5
 ROOT_IMG_DIR = "datasets/images"
 MODEL_DIR = "models"
 
-LOAD_MODEL_FILE = f"{MODEL_DIR}/trained_model_87_2024-05-05_19:27:41_loss_0.6552832722663879_acc_69.07894736842105.pt"
+# LOAD_MODEL_FILE = f"{MODEL_DIR}/"
+LOAD_MODEL_FILE = None
+MODEL_NUM = 0
 ##
 
 
@@ -23,18 +27,14 @@ def test(
     model: ResNet,
     device: torch.device,
     test_loader: DataLoader,
-    criterion: nn.CrossEntropyLoss,
-    test: bool = True,
+    save_name: str = f"{MODEL_NUM}",
 ):
     """
     Evaluate test accuracy of model
     """
     correct = 0
-    loss = 0
     all_predictions = []
     all_labels = []
-
-    total_mini_batches = len(test_loader.dataset) // BATCH_SIZE + 1  # type: ignore
 
     model.eval()
     with torch.no_grad():
@@ -42,54 +42,64 @@ def test(
             inputs, labels = inputs.to(device), labels.to(device)
             # compute
             outputs = model(inputs)
-            # calculate running loss
-            loss += criterion(outputs, labels)
             _, predicted = torch.max(outputs.data, 1)
             correct += (predicted == labels).sum().item()
+
             all_predictions.extend(predicted.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
 
     size = len(test_loader.dataset)  # type: ignore
-    loss /= total_mini_batches
     accuracy = correct / size
 
+    # print(accuracy, correct, size)
+
+    print(classification_report(all_labels, all_predictions))
+
     # generate Confusion Matrix
-    # cm = confusion_matrix(all_labels, all_predictions)
-    disp = ConfusionMatrixDisplay.from_predictions(
+    cm_disp = ConfusionMatrixDisplay.from_predictions(
         all_labels, all_predictions, normalize="true"
     )
-    disp.plot().figure_.savefig("confusion_matrix1.png")
-
-    eval_type = "Test" if test else "Val"
-
-    print(
-        f"[{eval_type} eval]\tAverage loss: {loss:.4f}\tAccuracy: {correct}/{size} ({accuracy:.2%})"
-    )
+    cm_disp.plot().figure_.savefig(f"{save_name}_confusion_matrix.png")
 
 
 def main():
+    # args
+    parser = argparse.ArgumentParser(description="Eval script arguments")
+    parser.add_argument(
+        "--test", action="store_true", help="Enable test mode (default: False)"
+    )
+    parser.add_argument(
+        "--dsinfo",
+        action="store_true",
+        help="Print info about the train and test datasets (default: False)",
+    )
+    args = parser.parse_args()
+    #
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    # initialize model
-    layer_depths = [2, 2, 2, 2]
-    model = ResNet(layer_depths, NUM_CLASSES, DROPOUT_RATE)
-    model = model.to(device)  # move to GPU if available
-
-    # define loss function and optimizer
-    criterion = nn.CrossEntropyLoss()
-
-    if LOAD_MODEL_FILE is not None:
-        model.load_state_dict(torch.load(LOAD_MODEL_FILE))
 
     # load dataset
     train_loader, _ = load_data(ROOT_IMG_DIR, BATCH_SIZE, shuffle=True)
 
     test_loader = load_data(ROOT_IMG_DIR, BATCH_SIZE, shuffle=False, test=True)
-    # from collections import Counter
 
-    # print(dict(Counter(train_loader.dataset.targets)))
+    if args.dsinfo:
+        print("Train class distribution", dict(Counter(train_loader.dataset.targets)))  # type: ignore
+        print("Test class distribution", dict(Counter(test_loader.dataset.targets)))  # type: ignore
 
-    test(model, device, train_loader, criterion)  # type: ignore
+    if LOAD_MODEL_FILE is None:
+        return
+
+    # initialize model
+    layer_depths = [2, 2, 2, 2]
+    model = ResNet(layer_depths, NUM_CLASSES, DROPOUT_RATE)
+    model.load_state_dict(torch.load(LOAD_MODEL_FILE))
+    model = model.to(device)  # move to GPU if available
+
+    if not args.test:
+        test(model, device, train_loader, f"{MODEL_NUM}_train")
+    else:
+        test(model, device, test_loader, f"{MODEL_NUM}_test")  # type: ignore
 
 
 if __name__ == "__main__":

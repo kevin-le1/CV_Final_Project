@@ -20,7 +20,7 @@ The project explores strategies to handle challenges such as varying lighting co
   - `cnn/model.py`: Class representing the PyTorch model, using residual layers a la ResNet with added Dropout layers
   - `cnn/preprocess.py`: Functions to handle image normalization and PyTorch DataLoader creation; prepared test, validation, and train sets
   - `cnn/train.py`: Main train script
-  - `cnn/eval.py`: Takes a model and outputs a confusion matrix on the test set
+  - `cnn/eval.py`: Takes a model and outputs a confusion matrix on the test set; the `--test` runs the evaluation on the test set and the `--dsinfo` outputs information about inter class distribution in the dataset
   - `cnn/oil_images.py`: Script to scrape Google Images for the top 20 images ranked under a search parameter; used to gather images for the dataset on oil spills
   - `cnn/wandb_data.py`: Script to send .csv data to Weights and Biases (wandb) for visualization and analysis; reads a given `.csv` file using pandas and sends data row by row, with cell mutation and row omission (if necessary)
   - `cnn/oil/`: Directory containing subfolders of results of `oil_images.py`; these search results are ingressed by the `data.ipynb` file in the creation of the dataset
