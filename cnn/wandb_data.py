@@ -6,6 +6,8 @@ import wandb
 import pandas as pd
 
 FILENAME = "wandb_export_2024-05-05T10_07_23.233-04_00.csv"
+THRESHOLD = 1
+
 loaded_experiment_df = pd.read_csv(FILENAME)
 
 # grab column names from csv
@@ -37,7 +39,7 @@ for i, row in loaded_experiment_df.iterrows():
         metrics[metric_col[1]] = row[metric_col[0]] * multiplier
 
     # if all metrics have been grabbed (train, val, test)
-    if len(metrics) != 3:
+    if len(metrics) != THRESHOLD:
         continue
 
     run.log(metrics)
