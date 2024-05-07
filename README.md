@@ -29,7 +29,7 @@ How to run:
 
 1. Install the necessary dependencies using `requirements.txt`
 2. Run the cells in `data.ipynb` to download the dataset and organize it into train/validation/test subdirectories with class label (0-2) folder structures
-3. Configure hyperparameters in `train.py`, including the Weights and Biases (wandb) API key for training visualization
+3. Configure hyperparametersg in `train.py`, including the Weights and Biases (wandb) API key for training visualization
 4. Run `python train.py` to initiate training of the model
    1. Optionally, precompute dataset mean and standard deviation using `python preprocess.py` and replace `ds_mean` and `ds_std_dev` in `load_data` in `preprocess.py`
 5. Optionally, Use `python eval.py` to create a confusion matrix for the finished model
@@ -50,11 +50,13 @@ How to run:
 <br />
 
 After installing all of the dependencies, cd into `obj_det_no_gpu/` and run the following command:
-  - `modal run train.py`
-<br />
+
+- `modal run train.py`
+  <br />
 
 To obtain the results, run the following command
-  - `modal volume get my-persisted-volume (path) (dest)`
+
+- `modal volume get my-persisted-volume (path) (dest)`
 
 <br />
 
